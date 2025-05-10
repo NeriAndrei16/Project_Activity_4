@@ -1,3 +1,4 @@
+
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -49,3 +50,23 @@ def register():
 
 if name == "main":
     app.run(debug=True)
+
+
+@app.route('/change_password', methods=['POST'])
+def change_password():
+    data = request.json
+    username = data.get("username")
+    old_password = data.get("old_password")
+    new_password = data.get("new_password")
+    
+    if not username or not old_password or not new_password:
+        return jsonify({"error": "Missing required fields: username, old_password, or new_password"}), 400
+
+    # Simulate checking if the user exists and if the old password is correct
+    if username not in users or users[username]["password"] != old_password:
+        return jsonify({"error": "Invalid username or old password"}), 401
+
+    # Update the password
+    users[username]["password"] = new_password
+    return jsonify({"message": "Password changed successfully!"}), 200
+
