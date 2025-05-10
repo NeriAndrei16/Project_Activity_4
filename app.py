@@ -31,16 +31,34 @@ def login():
 
 
 
-@app.route('/reset_password', methods=['POST'])
-def reset_password():
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+# Simulating user session
+active_sessions = {}
+
+@app.route('/login', methods=['POST'])
+def login():
     data = request.json
-    username = data.get('username')
+    username = data.get("username")
+    password = data.get("password")
 
-    if not username:
-        return jsonify({'error': 'Username is required'}), 400
+    # Simulate a user checking the username and password
+    if username == "john_doe" and password == "password123":
+        active_sessions[username] = True  # User is logged in
+        return jsonify({"message": "Login successful!"}), 200
+    return jsonify({"error": "Invalid credentials"}), 401
 
-    if username not in users:
-        return jsonify({'error': 'User does not exist'}), 404
+@app.route('/logout', methods=['POST'])
+def logout():
+    data = request.json
+    username = data.get("username")
 
-    # Simulating sending a password reset link (in reality, you'd send an email)
-    return jsonify({'message': 'Password reset link sent to your email!'}), 200
+    if username in active_sessions:
+        del active_sessions[username]  # Remove user from active sessions (simulating logout)
+        return jsonify({"message": f"{username} logged out successfully!"}), 200
+    return jsonify({"error": "User is not logged in"}), 400
+
+if __name__ == "__main__":
+    app.run(debug=True)
