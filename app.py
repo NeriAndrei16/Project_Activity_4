@@ -29,3 +29,18 @@ def login():
     else:
         return jsonify({"error": "Invalid credentials"}), 401
 
+
+
+@app.route('/reset_password', methods=['POST'])
+def reset_password():
+    data = request.json
+    username = data.get('username')
+
+    if not username:
+        return jsonify({'error': 'Username is required'}), 400
+
+    if username not in users:
+        return jsonify({'error': 'User does not exist'}), 404
+
+    # Simulating sending a password reset link (in reality, you'd send an email)
+    return jsonify({'message': 'Password reset link sent to your email!'}), 200
