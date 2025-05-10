@@ -2,6 +2,27 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
+# In-memory users store for the demo
+users = {}
+
+# Register Route
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+    email = data.get('email', '')  # Optional email field
+
+    if not username or not password:
+        return jsonify({'error': 'Username and password are required'}), 400
+
+    if username in users:
+        return jsonify({'error': 'User already exists'}), 400
+
+    users[username] = {'password': password, 'email': email}
+    return jsonify({'message': 'User registered successfully!'}), 201
+
+# Profile Update Route
 @app.route('/profile', methods=['POST'])
 def update_profile():
     data = request.json
@@ -10,10 +31,7 @@ def update_profile():
         return jsonify({"error": "Missing name"}), 400
     return jsonify({"message": "Profile updated successfully"})
 
-if __name__ == '__main__':
-    app.run(debug=True)
-
-
+# Login Route
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json
@@ -30,35 +48,30 @@ def login():
         return jsonify({"error": "Invalid credentials"}), 401
 
 
-
-from flask import Flask, request, jsonify
-
-app = Flask(__name__)
-
-# Simulating user session
-active_sessions = {}
-
-@app.route('/login', methods=['POST'])
-def login():
+@app.route('/change_password', methods=['POST'])
+def change_password():
     data = request.json
-    username = data.get("username")
-    password = data.get("password")
+    username = data.get('username')
+    old_password = data.get('old_password')
+    new_password = data.get('new_password')
+    confirm_password = data.get('confirm_password')
 
-    # Simulate a user checking the username and password
-    if username == "john_doe" and password == "password123":
-        active_sessions[username] = True  # User is logged in
-        return jsonify({"message": "Login successful!"}), 200
-    return jsonify({"error": "Invalid credentials"}), 401
+    # Check if user is logged in
+    if username not in logged_in_users:
+        return jsonify({'error': 'User not logged in'}), 401
 
-@app.route('/logout', methods=['POST'])
-def logout():
-    data = request.json
-    username = data.get("username")
+    # Verify old password
+    if users[username]['password'] != old_password:
+        return jsonify({'error': 'Old password is incorrect'}), 400
 
-    if username in active_sessions:
-        del active_sessions[username]  # Remove user from active sessions (simulating logout)
-        return jsonify({"message": f"{username} logged out successfully!"}), 200
-    return jsonify({"error": "User is not logged in"}), 400
+    # Check if new password and confirm password match
+    if new_password != confirm_password:
+        return jsonify({'error': 'New password and confirm password do not match'}), 400
 
+    # Update password
+    users[username]['password'] = new_password
+    return jsonify({'message': 'Password changed successfully'}), 200
+
+# Main entry point
 if __name__ == "__main__":
     app.run(debug=True)
