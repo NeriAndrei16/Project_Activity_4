@@ -51,27 +51,17 @@ def login():
 @app.route('/change_password', methods=['POST'])
 def change_password():
     data = request.json
-    username = data.get('username')
-    old_password = data.get('old_password')
-    new_password = data.get('new_password')
-    confirm_password = data.get('confirm_password')
+    username = data.get("username")
+    old_password = data.get("old_password")
+    new_password = data.get("new_password")
+    
+    if not username or not old_password or not new_password:
+        return jsonify({"error": "Missing required fields: username, old_password, or new_password"}), 400
 
-    # Check if user is logged in
-    if username not in logged_in_users:
-        return jsonify({'error': 'User not logged in'}), 401
+    # Simulate checking if the user exists and if the old password is correct
+    if username not in users or users[username]["password"] != old_password:
+        return jsonify({"error": "Invalid username or old password"}), 401
 
-    # Verify old password
-    if users[username]['password'] != old_password:
-        return jsonify({'error': 'Old password is incorrect'}), 400
-
-    # Check if new password and confirm password match
-    if new_password != confirm_password:
-        return jsonify({'error': 'New password and confirm password do not match'}), 400
-
-    # Update password
-    users[username]['password'] = new_password
-    return jsonify({'message': 'Password changed successfully'}), 200
-
-# Main entry point
-if __name__ == "__main__":
-    app.run(debug=True)
+    # Update the password
+    users[username]["password"] = new_password
+    return jsonify({"message": "Password changed successfully!"}), 200
